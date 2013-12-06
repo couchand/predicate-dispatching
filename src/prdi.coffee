@@ -19,7 +19,7 @@ class Dispatcher
       context = obj or {}
       for i in [0...args.length]
         context[params[i][0]] = args[i]
-        isThis = isThis and params[i][1].apply(null, [args[i]])
+        isThis = isThis and params[i][1].apply(context, [args[i]])
       if isThis
         return fn.apply(context)
     throw "no candidate matched"
