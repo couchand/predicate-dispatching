@@ -4,16 +4,24 @@ class Dispatcher
   constructor: ->
     @methods = {}
 
-  register: (name, fn, pred) ->
+  register: (name, params, fn) ->
     unless name of @methods
       @methods[name] = []
-    @methods[name].push([fn, pred])
+    unless params.length of @methods[name]
+      @methods[name][params.length] = []
+    @methods[name][params.length].push([params, fn])
 
   dispatch: (name, args) ->
     throw "no method found" unless name of @methods
-    for [fn, pred] in @methods[name]
-      if pred.apply(null, args)
-        return fn.apply(null, args)
+    throw "airity mismatch" unless args.length of @methods[name]
+    for [params, fn] in @methods[name][args.length]
+      isThis = yes
+      context = {}
+      for i in [0...args.length]
+        context[params[i][0]] = args[i]
+        isThis = isThis and params[i][1].apply(null, [args[i]])
+      if isThis
+        return fn.apply(context)
     throw "no candidate matched"
 
   dispatcher: (name) ->
